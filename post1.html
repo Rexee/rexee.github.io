@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    
+    <title>ТехноБлог - Создаем свою библиотеку для подключения через Gradle</title>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="page-heading">
+                        <h2>Создаем свою библиотеку для подключения через Gradle</h1>
+                        <span class="post-date">26 августа 2016</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+                    <p>Часто бывает так, что при переходе от одного проекта к другому, постоянно требуются одни и те же классы или наборы классов. До недавнего времени я решал это просто копированием из одного из предыдущих проектов попутно дополняя недостающий функциональностью.
+                    <p>Однако это чревато тем, что в разных проектах состав одного и того же класса получается разный и ты, в конце концов, уже не помнишь, какой проект содержит последнюю версию.</p>
+                    <p>Так возникла идея использовать единые репозитории переиспользуемого кода. Ну а для того, чтобы не зависеть от расположения репозитория, был выбран метод публикации на общедоступном ресурсе с возможность подключения в любом проекте. Для публикации возьмем JitPack.io. Так как публикация при помощи JitPack.io выполняется буквально в несколько кликов.</p>
+                    <p>В данной статья я рассмотрю простейший пример такого часто используемого кода. Простой логгер, ставящий целью просто заменять конструкцию <code class="language-java">Log.d(tag, msg)</code> на что-то более простое. Я использую для этого: <code class="language-java">S.L(msg)</code>. Не будем сейчас поднимать вопрос универсальности логгера, данная статья не об этом.</p>
+                    <p>Итак, есть код, который нужно сделать доступным между различными проектами. Приступаем:
+                    <ul>
+                    <li>Создаем профиль на GitHub если у вас его еще не было. Допустим вы назвали его <b>MyName</b></li>
+                    <li>Создаем проект в Android Studio. Без активити. Вычищаем ресурсы. В AndroidManifest.xml оставляем только что-то вроде:
+                    <pre><code class="language-java">
+                    &lt;manifest package="logger"&gt;
+                        &lt;application /&gt; 
+                    &lt;/manifest&gt;</code></pre>
+                    Ну и соответственно переименовываем каталоги так как вам нужно. Сделаем для примера следующую структуру:
+                    <img class="img-responsive" src="img/post1/img1.png" height = "200px" width = "200px"></li>
+                    <li>Далее открываем <code>build.gradle</code> уровня проекта и добавляем следующую строку в ветку <i>«dependencies»</i>:
+                    <pre><code class="language-java">buildscript {
+    dependencies {
+        ...
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+    }
+}</code></pre></li>
+                    <li>В <code>build.gradle</code> уровня модуля добавляем:
+                    <pre><code class="language-java">apply plugin: 'com.github.dcendents.android-maven'
+group = 'com.github.MyName'</code></pre>
+где <i>MyName</i> – имя вашего профиля на GitHub.
+</li>
+                    <li>Не забываем поменять android плагин c <code>application</code> на <code>library</code> и убрать строку с <i>applicationId.</i> В итоге наш <code>build.gradle</code> уровня модуля будет выглядеть примерно следующим образом:
+                    <pre><code class="language-java">apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.MyName'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.1"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+    }
+}
+</code></pre></li>
+<li>
+Далее создаем репозиторий на GitHub. Назовем его, скажем, <b>logger</b>. Любым доступным способом заливаем туда следующие файлы и каталоги:<ul>
+ <li> собственно каталог с вашим классом, тот, где лежат <code>AndroidManifest.xml</code> и <code>build.gradle</code>. В наше случае - это: <b><i>app</i></b></li>
+ <li> каталог <code>gradle/wrapper</code></li>
+<li> файлы: <code>build.gradle, gradlew, gradlew.bat, settings.gradle</code></li></ul>
+</li>
+<li>
+После этого в GitHub идем на вкладку <i>«releases»</i> и создаем релиз. Присваиваем ему тэг, например: <i>«1.0»</i>.</li>
+                    </ul>
+                    </p>
+                    <p>Вот собственно все! Публикация выполнена! Все что нужно в дальнейшем, чтобы использовать наш модуль в любом из проектов, это прописать следующие строки:<ul>
+                    <li>В файл <code>build.gradle</code> уровня проекта:<pre><code class="language-java">
+                    allprojects {
+    repositories {
+        ...
+        maven {url "https://jitpack.io"}
+    }
+}
+</code></pre></li>
+                    <li>Собственно зависимость в <code>build.gradle</code> уровня модуля в ветку <i>«dependencies»</i>. В нашем примере получится следующее:
+                    <pre><code class="language-java">dependencies {
+    ...
+    compile 'com.github.MyName:logger:1.0'
+}</code></pre></li>
+                    </ul>
+                    <p>Если что-то пошло не так, то можно проверить что модуль вообще устанавливается при помощи команды <code>gradlew install</code> из локального каталога, где лежит файл <i>gradlew</i>.</p>
+                    <p>Рабочий пример можно взять здесь: <a href="https://github.com/Rexee/s">https://github.com/Rexee/s</a></p>                   
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <hr>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                   <p class="copyright text-muted">Copyright &copy; Techno Blog 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS/CSS -->
+    <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
+
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/tech-blog.min.css" rel="stylesheet">
+    <link href="css/prism.min.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="js/prism.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>    
+    <script src="js/tech-blog.js"></script>
+    
+</body>
+
+</html>
