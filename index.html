@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>ТехноБлог</title>
+    <title>ТехноБлог - Записки Android программиста</title>
 
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/tech-blog.min.css" rel="stylesheet">
@@ -46,7 +46,7 @@
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="site-heading">
                         <h1>ТехноБлог</h1>
-                        <span class="subheading">Записки программиста</span>
+                        <h3>Записки Android программиста</h3>
                     </div>
                 </div>
             </div>
@@ -58,20 +58,39 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <div class="post-preview">
+                    <a href="post2.html">
+                        <h2 class="post-title">
+                            Создание View с автоматическим выравниванием текста по ширине строки
+                        </h2>
+                    </a>
+                    <p class="post-meta">1 сентября 2016.<code class="tag">Android</code></p>
+                    <h3 class="post-subtitle">
+                        Мне всегда было не особо интересно как устроены View и отрисовка текста на низком уровне.
+                        Я знал примерно основы, что есть onLayout, onMeasure, onDraw где и творится вся магия.
+                        Однако в последнее время все чаще стали поступать предложения о разработке custom View-компонентов с
+                        особой логикой работы с текстом и, в результате, было принято решение разобраться во всех тонкостях
+                        внутренней кухни создания и управления отображением своих View. Для примера было взято создание компонента
+                        для отображения текста с автоматическим выравниванием по ширине. <a href="post2.html" class = "read-more">Читать дальше...</a>
+                    </h3>
+                </div>
+                <hr />
+                <div class="post-preview">
                     <a href="post1.html">
                         <h2 class="post-title">
-                            Создаем свою библиотеку для подключения через Gradle
+                            Переиспользование кода при помощи подключаемых библиотек Gradle
                         </h2>
                     </a>
                     <p class="post-meta">26 августа 2016.<code class="tag">Android</code></p>
                     <h3 class="post-subtitle">
-                        Часто бывает так, что при переходе от одного проекта к другому, постоянно требуются одни и те же классы или наборы классов. До недавнего времени я решал это просто копированием класса из одного из предыдущих проектов, попутно дополняя недостающий функциональностью. <a href="post1.html" class = "read-more">Читать дальше...</a>
-                    </h3>   
-                </div>                               
+                        Часто бывает так, что при переходе от одного проекта к другому, постоянно требуются одни и те же классы или наборы классов.
+                        До недавнего времени я решал это просто копированием класса из одного из предыдущих проектов, попутно дополняя недостающий
+                        функциональностью. <a href="post1.html" class = "read-more">Читать дальше...</a>
+                    </h3>
+                </div>
             </div>
         </div>
     </div>
-                
+
     <!-- Footer -->
     <footer>
         <hr>
@@ -83,7 +102,7 @@
             </div>
         </div>
     </footer>
-    
+
     <!-- JS/CSS -->
     <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
 
@@ -95,7 +114,7 @@
     <![endif]-->
 
     <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>    
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
     <script src="js/tech-blog.js"></script>
 
 </body>

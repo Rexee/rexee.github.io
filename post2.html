@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Создание View с автоматическим выравниванием текста по ширине строки</title>
+
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/tech-blog.min.css" rel="stylesheet">
+    <link href="css/prism.min.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" >
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="page-heading">
+                        <h1>Создание View с автоматическим выравниванием текста по ширине строки</h1>
+                        <span class="post-date">1 сентября 2016</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+                    <p>Мне всегда было не особо интересно как устроены View и отрисовка текста на низком уровне.
+                      Я знал примерно основы, что есть <code class="function">onLayout()</code>, <code class="function">onMeasure()</code>,
+                      <code class="function">onDraw()</code> где и творится вся магия.
+                      Однако в последнее время все чаще стали поступать предложения о разработке собственных View-компонентов
+                      с особой логикой работы с текстом и, в результате, было принято решение разобраться во всех тонкостях внутренней
+                      кухни создания и управления отображением своих View. Для примера было взято создание компонента для отображения
+                      текста с автоматическим выравниванием по ширине:
+                    </p>
+                    <a href="img/post2/img1.png">
+                      <img class="img-responsive img-center" src="img/post2/img1.png" width = "250px" alt="Текст с автоматическим выравниванием по ширине" style = "margin-bottom: -5px" >
+                    </a>
+                    <p>При помощи простого <b>TextView</b> нет возможности добиться отображения текста так как мы привыкли это видеть в книжной типографии.
+                      Да, начиная с API 23 появилась возможность добавлять расстановку переносов
+                      (<a href="https://developer.android.com/reference/android/widget/TextView.html#attr_android:breakStrategy">breakStrategy</a>
+                      и <a href="https://developer.android.com/reference/android/widget/TextView.html#attr_android:hyphenationFrequency">hyphenationFrequency</a>
+                      но, во первых, это никак не влияет на выравнивание текста по ширине, во вторых, опции доступны только в API 23 и выше.
+                    </p>
+                    <p>Перед тем как приступать к реализации, разберемся с теорией.
+                      Итак, нам нужно чтобы правый край текста был выровнен вдоль одной вертикальной линии так же
+                      как сейчас мы видим выровнен левый (Типографский термин: <a href="https://ru.wikipedia.org/wiki/%D0%92%D1%8B%D0%BA%D0%BB%D1%8E%D1%87%D0%BA%D0%B0_(%D1%82%D0%B8%D0%BF%D0%BE%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0)#.D0.92.D1.8B.D0.BA.D0.BB.D1.8E.D1.87.D0.BA.D0.B0_.D0.BF.D0.BE_.D1.84.D0.BE.D1.80.D0.BC.D0.B0.D1.82.D1.83">Выключка по формату</a>).
+                      Этого добиться можно следующими способами: увеличением размеров пробелов между словами и увеличением межсимвольного интервала, т.е.
+                      <a href="https://ru.wikipedia.org/wiki/%D0%A2%D1%80%D0%B5%D0%BA%D0%B8%D0%BD%D0%B3_(%D1%82%D0%B8%D0%BF%D0%BE%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0">трекинга</a>
+                    </p>
+                    <p>
+                      Настройка трекинга появилась только в API 21 (<a href="(https://developer.android.com/reference/android/widget/TextView.html#attr_android:letterSpacing">setLetterSpacing</a>)
+                      и реализовывать его вручную для предыдущих API не очень хочется, к тому же необходимо очень
+                      осторожно использовать изменение межсимвольного расстояния, поскольку в этом случае теряется однородность
+                      текста и он начинает выглядеть некрасиво. Поэтому пока не будем трогать трекинг и возьмемся за размеры пробелов.
+                    </p>
+                    <p>
+                      Прежде чем приступить к алгоритму, давайте разберемся с тем как в Android происходит отрисовка текста.
+                      Главная за отрисовку - функция <code class="language-java">onDraw(Canvas canvas)</code>, в которой собственно и должны происходить
+                      все действия по отображению. Самый простой способ нарисовать текст на <code class="code">canvas</code>, это использовать функцию
+                      <code class="language-java">canvas.drawText(text, start, end, x, y, paint)</code>.
+                      Но для того чтобы понять, какие подставлять <b>x</b> и <b>y</b>, давайте посмотрим, как в Android выглядит координатная сетка:
+                    </p>
+                    <a href="img/post2/img2.png">
+                      <img class="img-responsive img-center" src="img/post2/img2.png" width = "500px" alt="Android canvas: координатная сетка">
+                    </a>
+                    <p>
+                      В отличие от привычной системы координат, в Android ось Y перевернута и начинает свой отсчет от левого верхнего угла.
+                      В то время как координаты x и y, которые мы передаем в drawText указывают на левый нижний угол первой буквы текста.
+                      <i>Fm.top</i>, <i>fm.ascent</i>, <i>fm.descent</i> – это поля из <code class="class-name">FontMetrics</code> которые получаем при помощи <code class="language-java">mTextPaint.getFontMetrics()</code>.
+                      <i>Fm.top</i> – расстояние от <a href="https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D1%8F_%D0%BB%D0%B8%D0%BD%D0%B8%D1%8F_(%D0%B4%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD_%D1%88%D1%80%D0%B8%D1%84%D1%82%D0%B0)">базовой линии</a>
+                      до верхней границы строки. <i>Fm.ascent</i> – максимальная высота символов, fm.descent – высота нижних элементов символов.
+                      Нижние элементы могут заходить на следующую строку, размера fm.top должно хватать чтобы символы не пересекались.
+                    </p>
+                    <p>
+                      После того, как мы разобрались с тем что использовать в качестве координат, опишу собственно алгоритм на словах.
+                      Конечно он не идеален и всегда можно найти пути оптимизаций, но для данной заметки — это не главное.
+                      Чтобы не производить постоянные расчеты в функции <code class="function">onDraw()</code>, будем делать это один
+                      раз в функции <code class="function">setText()</code>, где рассчитаем позиции x,y и длину каждого слова,
+                      а в <code class="function">onDraw()</code> просто будем использовать полученные координаты для отрисовки текста
+                      через <code class="function">drawText()</code>.
+                    </p>
+                    <p>Собственно, алгоритм следующий (привожу в частично измененном виде для упрощения понимания):</p>
+                    <ul>
+                      <li>Измеряем размеры каждого символа:</li>
+                      <pre><code class="language-java">widths = new float[mText.length()];
+mTextPaint.getTextWidths(mText, widths);</code></pre>
+                      <li>Начинаем набирать символы в строку до тех пор, пока не выйдем за пределы экрана. После этого обрезаем текущую строку по последнему пробелу.</li>
+                      <li>От ширины экрана отнимаем сумму ширин символов в строке за исключением пробелов:</li>
+                      <pre><code class="language-java">for (TextBlockDrawable word : words) {
+    for (int i = word.start; i < word.end; i++) {
+        widthTotal -= widths[i];
+    }
+}</code></pre>
+                      <li>Оставшееся пространство нужно распределить равномерно между количеством пробелов в строке:</li>
+                      <pre><code class="language-java">int spacesShift = 0;
+for (TextBlockDrawable word : words) {
+    word.x += spacesShift;
+    spacesShift += spaceLen;
+}</code></pre>
+                      <li>Вот и все. Осталось только вывести набранные таким образом строки в <code class="function">onDraw()</code>:</li>
+                      <pre><code class="language-java">for (TextBlockDrawable block : mTextBlocks) {
+    canvas.drawText(mText, block.start, block.end, block.x, block.y, mTextPaint);
+}</code></pre>
+                    </ul>
+                    <p>
+                      Собственно, алгоритм довольно несложный и разработчики Android вполне могли бы его включить в отрисовку
+                      стандартного <b>TextView</b>. Хотя кто знает, вот - через 7 лет после первого релиза появились переносы.
+                      Может и выравнивание дождемся. А пока товарищ Romain Guy занимается тем что рассматривает –
+                      <a href="https://medium.com/google-developers/a-better-underline-for-android-90ba3a2e4fb">какие подчеркивания красивее смотрятся</a>
+                    </p>
+                    <p>
+                      Как всегда код проекта доступен на GitHub: <a href="https://github.com/Rexee/JustifiedTextView">https://github.com/Rexee/JustifiedTextView</a>
+                    </p>
+                    <a href="img/post2/img3.gif">
+                      <img class="img-responsive img-center" src="img/post2/img3.gif" width = "200px" alt="Пример текста с автоматическим выравниванием по ширине">
+                    </a>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <hr>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                   <p class="copyright text-muted">Copyright &copy; Techno Blog 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS/CSS -->
+    <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="js/prism.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/tech-blog.js"></script>
+
+</body>
+
+</html>
