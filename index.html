@@ -57,36 +57,64 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="post-preview">
-                    <a href="post2.html">
-                        <h2 class="post-title">
-                            Создание View с автоматическим выравниванием текста по ширине строки
-                        </h2>
-                    </a>
-                    <p class="post-meta">1 сентября 2016.<code class="tag">Android</code></p>
-                    <h3 class="post-subtitle">
-                        Мне всегда было не особо интересно как устроены View и отрисовка текста на низком уровне.
-                        Я знал примерно основы, что есть onLayout, onMeasure, onDraw где и творится вся магия.
-                        Однако в последнее время все чаще стали поступать предложения о разработке custom View-компонентов с
-                        особой логикой работы с текстом и, в результате, было принято решение разобраться во всех тонкостях
-                        внутренней кухни создания и управления отображением своих View. Для примера было взято создание компонента
-                        для отображения текста с автоматическим выравниванием по ширине. <a href="post2.html" class = "read-more">Читать дальше...</a>
-                    </h3>
-                </div>
+              <article class="post-preview">
+                <a href="post3.html">
+                    <h2 class="post-title">
+                        WordsLayoutManager - переноc по словам: модификация LinearLayoutManager для RecyclerView
+                    </h2>
+                </a>
+                <p class="post-meta">7 сентября 2016.<code class="tag">Android</code></p>
+                <img class="img-responsive img-post-preview" align = "left" src="img/post3/img1.png" width = "200px" alt="Текст с автоматическим выравниванием по ширине"  >
+
+                <h3 class="post-subtitle">
+                    С введением схемы RecyclerView &harr; LayoutManager появилась возможность более гибко управлять выводом
+                    списочной информации на экран. В данный момент в стандартный набор от Google входят
+                    <code class="class-name">LinearLayoutManager</code> – линейный список: 1 элемент = 1 строке, <code class="class-name">GridLayoutManager</code> – список с заданным
+                    количеством колонок, и <code class="class-name">StaggeredGridLayoutManager</code> – тот же <code class="class-name">GridLayoutManager</code>, только с элементами
+                    произвольной высоты (если ориентация – вертикальная). Собственно, во всех указанных случаях количество
+                    колонок – заранее фиксировано.
+                    <a href="post3.html" class = "read-more">Читать дальше...</a>
+                </h3>
+
+              </article>
+              <hr />
+              <article class="post-preview">
+                  <a href="post2.html">
+                      <h2 class="post-title">
+                          Создание View с автоматическим выравниванием текста по ширине строки
+                      </h2>
+                  </a>
+                  <p class="post-meta">1 сентября 2016.<code class="tag">Android</code></p>
+                  <img class="img-responsive img-post-preview" align = "left" src="img/post2/img1.png" width = "200px" alt="Текст с автоматическим выравниванием по ширине"  >
+
+                  <h3 class="post-subtitle">
+                      Мне всегда было не особо интересно как устроены View и отрисовка текста на низком уровне.
+                      Я знал примерно основы, что есть onLayout, onMeasure, onDraw где и творится вся магия.
+                      Однако в последнее время все чаще стали поступать предложения о разработке custom View-компонентов с
+                      особой логикой работы с текстом и, в результате, было принято решение разобраться во всех тонкостях
+                      внутренней кухни создания и управления отображением своих View. Для примера было взято создание компонента
+                      для отображения текста с автоматическим выравниванием по ширине.
+                      <a href="post2.html" class = "read-more">Читать дальше...</a>
+                  </h3>
+                  <br />
+
+                </article>
                 <hr />
-                <div class="post-preview">
+                <article class="post-preview">
                     <a href="post1.html">
                         <h2 class="post-title">
                             Переиспользование кода при помощи подключаемых библиотек Gradle
                         </h2>
                     </a>
+
                     <p class="post-meta">26 августа 2016.<code class="tag">Android</code></p>
+
                     <h3 class="post-subtitle">
                         Часто бывает так, что при переходе от одного проекта к другому, постоянно требуются одни и те же классы или наборы классов.
                         До недавнего времени я решал это просто копированием класса из одного из предыдущих проектов, попутно дополняя недостающий
                         функциональностью. <a href="post1.html" class = "read-more">Читать дальше...</a>
                     </h3>
-                </div>
+                </article>
             </div>
         </div>
     </div>

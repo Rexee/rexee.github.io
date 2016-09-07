@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>WordsLayoutManager - переноc по словам: модификация LinearLayoutManager для RecyclerView</title>
+
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/tech-blog.min.css" rel="stylesheet">
+    <link href="css/prism.min.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" >
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="page-heading">
+                        <h1>WordsLayoutManager - переноc по словам: модификация LinearLayoutManager для RecyclerView</h1>
+                        <span class="post-date">7 сентября 2016</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+                    <p>  С введением схемы RecyclerView &harr; LayoutManager появилась возможность более гибко управлять выводом
+                      списочной информации на экран. В данный момент в стандартный набор от Google входят
+                      <code class="class-name">LinearLayoutManager</code> – линейный список: 1 элемент = 1 строке, <code class="class-name">GridLayoutManager</code> – список с заданным
+                      количеством колонок, и <code class="class-name">StaggeredGridLayoutManager</code> – тот же <code class="class-name">GridLayoutManager</code>, только с элементами
+                      произвольной высоты (если ориентация – вертикальная). Собственно, во всех указанных случаях количество
+                      колонок – заранее фиксировано.
+                    </p>
+                    <p>Но что если нам требуется динамически выводить данные, без привязки к колонкам? В данной заметке я рассмотрю метод,
+                      при помощи которого мы создадим свой LayoutManager с произвольным выводом данных.
+                    </p>
+                    <p>Итак, нам нужно чтобы на вход подавался список элементов (скажем слов), а LayoutManager распределял вывод
+                      этих элементов таким образом, чтобы они максимально заполняли каждую строку. Если элемент по ширине не
+                      помещается на данную строку, то переносим его на следующую. Получается что-то вроде word-wrap (перенос по словам):
+                    </p>
+                    <a href="img/post3/img1.png">
+                      <img class="img-responsive img-center" src="img/post3/img1.png" width = "250px" alt="Текст с автоматическим выравниванием по ширине" style = "margin-bottom: -5px" >
+                    </a>
+                    <p>
+                      Сразу оговорюсь, что способов решения задачи достаточно много, начиная от формирования своего Layout и
+                      заворачивания его в ScrollView, заканчивая созданием полностью своего LayoutManager с наследованием
+                      от <code class="class-name">RecyclerView.LayoutManager</code>.
+                    </p>
+                    <p>
+                      Я выбрал компромиссный вариант: создал свой LayoutManager унаследовав его от существующего <code class="class-name">LinearLayoutManager</code>.
+                      Чем этот вариант хорош? Мы берем от <code class="class-name">LinearLayoutManager</code> все его преимущества. Команда разработчиков из Google
+                      потратила огромное количество времени вылизывая его код. Нам не нужно беспокоиться обо все возможных граничных вариантах,
+                      не нужно заниматься расчетами физики скроллинга, учитывать все возможные состояния isPreLayout и прочую весьма полезную,
+                       но все-таки рутину. Мы возьмем все готовое и просто перепишем логику вывода строк.
+                    </p>
+                    <p>
+                    Напомню для тех, кто не в курсе, как работает LayoutManager. Его задача брать View элементы из Recycler’а и указывать каким образом их располагать на экране. Т.е. пространство для управления отображением – практически безграничное. Есть 2 основные функции, где необходимо разместить логику отрисовки элементов:
+                    </p>
+                    <ol>
+                      <li>
+                        <code class="function">onLayoutChildren</code> – эта функция вызывается при первичном выводе (точнее при вызове onLayout() у RecyclerView) и при оповещении notifyDataSetChanged() для адаптера.
+                      </li>
+                      <li>
+                        <code class="function">scrollHorizontallyBy</code>/<code class="function">scrollVerticallyBy</code> – при скроллинге.
+                      </li>
+                    </ol>
+                    <p>На самом деле есть еще конечно всякие <code class="function">onFocusSearchFailed</code> и <code class="function">layoutForPredictiveAnimations</code>
+                       но сейчас не будем вдаваться в такие подробности, наш метод как раз покрывает все эти варианты.</p>
+                    <p>
+                      Вообще в стандартном <code class="class-name">LinearLayoutManager</code> вся логика вывода сосредоточена в двух
+                       функциях: <code class="function">fill</code> – который отвечает в общем за вывод строк и
+                       <code class="function">layoutChunk</code> – отвечающий за вывод отдельных элементов.
+                       Вот <code class="function">layoutChunk</code> мы и переопределим.
+                    </p>
+                    <p>
+                      Создаем класс <code class="class-name">WordsLayoutManager</code> с наследованием от
+                       <code class="class-name">LinearLayoutManager</code>. Для расчёта того, помещается слово
+                        или нет, нам потребуется знать общую доступную для вывода ширину layout’а. Для этого переопределяем
+                        <code class="function">onLayoutChildren</code>:
+                      <pre><code class="language-java">
+                        @Override
+                        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+                            layoutWidth = getWidth() - getPaddingRight() - getPaddingLeft();
+                            super.onLayoutChildren(recycler, state);
+                        }
+                      </code></pre>
+                    </p>
+                  <p>
+                    Для упрощения расчетов введем 2 вспомогательных класса - <code class="class-name">ViewModel</code> и <code class="class-name">LineModel</code>:
+                    <pre><code class="language-java">
+                      private class ViewModel {
+                          private View view;
+                          private int  width;
+
+                          public ViewModel(View child) {
+                              view = child;
+                              LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                              width = child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin;
+                          }
+                      }
+
+                      private class LineModel {
+                          private ArrayList<ViewModel> views;
+                          private int       width;
+
+                          public LineModel() {
+                              views = new ArrayList<>();
+                          }
+
+                          public void addView(ViewModel child) {
+                              addView(child, views.size());
+                          }
+
+                          public void addView(ViewModel child, int pos) {
+                              views.add(pos, child);
+                              width += child.width;
+                          }
+
+                          public boolean canFit(ViewModel child) {
+                              return width + child.width <= layoutWidth;
+                          }
+                      }
+                  </code></pre>
+                  </p>
+                  <p>
+                    Единственная цель <code class="class-name">ViewModel</code> – хранить ширину View.
+                    В свою очередь <code class="class-name">LineModel</code> хранит общую ширину строки и выполняет проверку –
+                    поместится ли новый View в эту строку.
+                  </p>
+                  <p>
+                    Далее, первая проблема с которой мы столкнемся это то, что и <code class="function">fill</code> и
+                    <code class="function">layoutChunk</code> – функции с областью видимости
+                    <a href="https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html">package private</a>,
+                    что не позволяет нам просто переопределить их. Придется перенести наш класс в тот же пакет
+                    что и <code class="class-name">LinearLayoutManager</code>, для этого в самой первой строке
+                    заменяем наш пакет на <code class="language-java">package android.support.v7.widget</code>.
+                    Все теперь переопределение доступно.
+                  </p>
+                  <p>
+                    Собственно логика <code class="function">layoutChunk</code> сводится к 2 блокам: в первом мы в
+                    цикле берем View из Recycler’а и складываем в объект <code class="class-name">LineModel</code> до
+                    тех пор, пока View помещаются в общую ширину layout’а (привожу сокращенный вариант без доп. проверок):
+                    <pre><code class="language-java">
+                      while(layoutState.hasMore(state)){
+                          childView = layoutState.next(recycler);
+
+                          measureChildWithMargins(childView, 0, 0);
+                          ViewModel view = new ViewModel(childView);
+
+                          if (currentLine.canFit(view)) {
+                              result.mConsumed = mOrientationHelper.getDecoratedMeasurement(childView);
+                              currentLine.addView(view);
+                              addView(childView);
+                          } else {
+                              layoutState.mCurrentPosition--;
+                              break;
+                          }
+                      }
+                    </code></pre>
+                  </p>
+                  <p>
+                    <code class="language-java">layoutState.mCurrentPosition--</code> нужен для того, чтобы уменьшить
+                    на 1 позицию текущего элемента в Recycler. Т.к. при помощи <code class="language-java">layoutState.next(recycler)</code> –
+                    мы автоматически увеличили <code class="code">mCurrentPosition</code>, и, если текущий View не вошел по ширине, то на
+                    следующей строке мы этот View просто потеряем. Тут можно было конечно придумать какой-нибудь
+                    вариант кеширования, что автоматически повлекло бы за собой доп. проверки и менеджмент этого кеша,
+                    но, т.к. задача в данном случае не критична к ресурсам, то я просто откатил текущую позицию.
+                  </p>
+                  <p>
+                    Если вы посмотрите исходники к данной заметке, то увидите, что помимо текущей позиции, необходимо учитывать
+                    направление, в котором выводятся элементы – сверху вниз или снизу-вверх. От этого зависит –
+                    в какую позицию вставлять новый View – в начало списка или в конец.
+                  </p>
+                  <p>
+                    Второй блок алгоритма:
+                    <pre><code class="language-java">
+                      int top = layoutState.mOffset;
+                      int bottom = layoutState.mOffset + result.mConsumed;
+                      int left = getPaddingLeft();
+
+                      int prevWidth = 0;
+                      for (ViewModel child : currentLine.views) {
+                          layoutDecorated(child.view, left + prevWidth, top, left + prevWidth + child.width, bottom);
+                          prevWidth += child.width;
+                      }
+                    </code></pre>
+                  </p>
+                  <p>
+                    Здесь <code class="language-java">layoutState.mOffset</code> – смещение от начала layout'а,
+                    <code class="language-java">result.mConsumed</code> – текущая высота строки, которую мы вычислили
+                     на первом этапе. И основная функция <code class="function">layoutDecorated</code> – которая и производит вывод и отрисовку
+                      View на экран в заданную позицию. Т.е. мы просто берем наш объект <code class="code">currentLine</code>
+                      который мы заполнили на первом шаге и выводим все его View слева направо по порядку. Все просто.
+                  </p>
+                  <p>
+                    Вот такая вот нехитрая реализация. Дальше для того чтобы использовать наш LayoutManager просто подключаем его стандартным способом:
+                    <pre><code class="language-java">
+                      RecyclerView recycler = (RecyclerView) findViewById(R.id.recycler);
+                      recycler.setLayoutManager(new WordsLayoutManager(this));
+                    </code></pre>
+                  </p>
+                  <p>
+                    Полный текст реализации и пример можно взять с GitHub: <a href="https://github.com/Rexee/WordsLayoutManager">https://github.com/Rexee/WordsLayoutManager</a>
+                  </p>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <hr>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                   <p class="copyright text-muted">Copyright &copy; Techno Blog 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS/CSS -->
+    <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="js/prism.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/tech-blog.min.js"></script>
+
+</body>
+
+</html>
