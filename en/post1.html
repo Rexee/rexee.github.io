@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Code reuse with Gradle's dependency management</title>
+
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/tech-blog.min.css" rel="stylesheet">
+    <link href="../css/prism.min.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-nav-right">
+                    <li>
+                        <a href="..\post1.html">RU</a>
+                    </li>
+                    <li class="selected">
+                        <a href="post1.html">EN</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="page-heading">
+                        <h1 class="h1-short">Code reuse with Gradle's dependency management</h1>
+                        <div class="post-date-short">August 26, 2016</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+                    <p>Too often, when we move from project to project, we find ourselves needing the same classes over and over. I used to solve this problem in new projects by simply copying code that gave me the functionality I needed from an older project.</p>
+                    <p>However, inevitably, after I would copy a class, I would end up making small changes to it. After a while, I ended up having as many different versions of a class as I had different projects, and it got difficult to remember which project contained the most recent version of a class.</p>
+                    <p>Centralized repositories solve the problem of code reuse. In this post, we are going to use <a href="https://JitPack.io">JitPack.io</a>, a public repository that allows you to make your code available to any Android project, on any computer, with just a few clicks.</p>
+                    <p>Here we will explore a simple example: a logger that replaces the invocation of
+                      <code class="language-java">Log.d(tag, msg)</code> with a simpler invocation: <code class="language-java">S.l(msg)</code>.
+                      We won’t, however, discuss implementing a universal logger - that is out of the scope of this post.</p>
+                    <p>So, we have some code that we want to be able to access from a few different projects. Let’s get started:
+                    <ul>
+                    <li>Create a GitHub account if you don’t already have one. For example, let’s say we named it <b>MyName</b></li>
+                    <li>Create a project in Android Studio. No activity. Clear out the resources folder. Replace <code>AndroidManifest.xml</code> with something along the lines of:
+                    <pre><code class="language-java">
+                    &lt;manifest package="logger"&gt;
+                        &lt;application /&gt;
+                    &lt;/manifest&gt;</code></pre>
+                    Rename the project folders as needed. An example project structure:
+                    <img class="img-responsive" src="../img/post1/img1.png" width = "200px" alt="Android project structure"></li>
+                    <li>Next, edit the project-level <code>build.gradle</code> and add the following line to the <i>«dependencies»</i> section:
+                    <pre><code class="language-java">buildscript {
+    dependencies {
+        ...
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+    }
+}</code></pre></li>
+                    <li>In the module-level <code>build.gradle</code> add:
+                    <pre><code class="language-java">apply plugin: 'com.github.dcendents.android-maven'
+group = 'com.github.MyName'</code></pre>
+replacing <i>MyName</i> with your GitHub account name.
+</li>
+                    <li>Don’t forget to change the android plugin from <code>application</code> to <code>library</code> and remove the
+                    <i>applicationId.</i> line. The final module-level <code>build.gradle</code> should look something like this:
+                    <pre><code class="language-java">apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.MyName'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.1"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+    }
+}
+</code></pre></li>
+                      <li>Next, create a GitHub repository. Let’s call it <b>logger</b> for example. Using whatever method you prefer, push the following files and directories to the repository
+                          <ul>
+                             <li> the directory containing your class <code>AndroidManifest.xml</code> and <code>build.gradle</code>. In our case, this was: <b><i>app</i></b></li>
+                             <li> the <code>gradle/wrapper</code> directory</li>
+                             <li> the files: <code>build.gradle, gradlew, gradlew.bat, settings.gradle</code></li>
+                          </ul>
+                      </li>
+                      <li>After this, go to GitHub, click on <i>«releases»</i> and create a release. Assign a tag to it, for example: <i>«1.0»</i>.</li>
+                    </ul>
+                    </p>
+                    <p>That’s it! Your module is published! All you need to do to use your module in any of your projects is to add the following lines:<ul>
+                    <li>In the project-level <code>build.gradle</code> file:<pre><code class="language-java">
+                    allprojects {
+    repositories {
+        ...
+        maven {url "https://jitpack.io"}
+    }
+}
+</code></pre></li>
+                    <li>Add the actual dependency to the module-level <code>build.gradle</code> file in the <i>«dependencies»</i>.
+                    section. In our example, we will add the following:
+                    <pre><code class="language-java">dependencies {
+    ...
+    compile 'com.github.MyName:logger:1.0'
+}</code></pre></li>
+                    </ul>
+                    <p>If there are any errors, you might want to check whether the module can even be installed in the first place, by running the <code>gradlew install</code> command from the local directory containing the <i>gradlew</i> file.</p>
+                    <p>You can find a working example here: <a href="https://github.com/Rexee/s">https://github.com/Rexee/s</a></p>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <hr>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                   <p class="copyright text-muted">Copyright &copy; Techno Blog 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS/CSS -->
+    <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-84320298-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../js/prism.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../js/tech-blog.min.js"></script>
+
+</body>
+
+</html>

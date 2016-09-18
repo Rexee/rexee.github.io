@@ -33,6 +33,15 @@
                         <a href="about.html">About</a>
                     </li>
                 </ul>
+
+                <ul class="nav navbar-nav navbar-nav-right">
+                    <li class="selected">
+                        <a href="post1.html">RU</a>
+                    </li>
+                    <li>
+                        <a href="\en\post1.html">EN</a>
+                    </li>
+                </ul>
             </div>
             <!-- /.navbar-collapse -->
         </div>
@@ -47,7 +56,7 @@
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="page-heading">
                         <h1>Переиспользование кода при помощи подключаемых библиотек Gradle</h1>
-                        <span class="post-date">26 августа 2016</span>
+                        <div class="post-date">26 августа 2016</div>
                     </div>
                 </div>
             </div>
@@ -59,14 +68,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
-                    <p>Часто бывает так, что при переходе от одного проекта к другому, постоянно требуются одни и те же классы или наборы классов. До недавнего времени я решал это просто копированием из одного из предыдущих проектов попутно дополняя недостающий функциональностью.
+                    <p>Часто бывает так, что при переходе от одного проекта к другому, постоянно требуются одни и те же классы или наборы классов. До недавнего времени я решал это просто копированием из одного из предыдущих проектов попутно дополняя недостающий функциональностью.</p>
                     <p>Однако это чревато тем, что в разных проектах состав одного и того же класса получается разный и ты, в конце концов, уже не помнишь, какой проект содержит последнюю версию.</p>
-                    <p>Так возникла идея использовать единые репозитории переиспользуемого кода. Ну а для того, чтобы не зависеть от расположения репозитория, был выбран метод публикации на общедоступном ресурсе с возможность подключения в любом проекте. Для публикации возьмем JitPack.io. Так как публикация при помощи JitPack.io выполняется буквально в несколько кликов.</p>
+                    <p>Так возникла идея использовать единые репозитории переиспользуемого кода. Ну а для того, чтобы не зависеть от расположения репозитория, был выбран метод публикации на общедоступном ресурсе с возможность подключения в любом проекте. Для публикации возьмем <a href="https://JitPack.io">JitPack.io</a>. Так как публикация при помощи JitPack.io выполняется буквально в несколько кликов.</p>
                     <p>В данной статья я рассмотрю простейший пример такого часто используемого кода. Простой логгер, ставящий целью просто заменять конструкцию <code class="language-java">Log.d(tag, msg)</code> на что-то более простое. Я использую для этого: <code class="language-java">S.l(msg)</code>. Не будем сейчас поднимать вопрос универсальности логгера, данная статья не об этом.</p>
                     <p>Итак, есть код, который нужно сделать доступным между различными проектами. Приступаем:
                     <ul>
                     <li>Создаем профиль на GitHub если у вас его еще не было. Допустим вы назвали его <b>MyName</b></li>
-                    <li>Создаем проект в Android Studio. Без активити. Вычищаем ресурсы. В AndroidManifest.xml оставляем только что-то вроде:
+                    <li>Создаем проект в Android Studio. Без активити. Вычищаем ресурсы. В <code>AndroidManifest.xml</code> оставляем только что-то вроде:
                     <pre><code class="language-java">
                     &lt;manifest package="logger"&gt;
                         &lt;application /&gt;
@@ -149,7 +158,15 @@ android {
 
     <!-- JS/CSS -->
     <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
-
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-84320298-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>

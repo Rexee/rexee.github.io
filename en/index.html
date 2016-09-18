@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>TechBlog - Android developer notes</title>
+
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/tech-blog.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="selected">
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-nav-right">
+                    <li>
+                        <a href="..\index.html">RU</a>
+                    </li>
+                    <li class="selected">
+                        <a href="index.html">EN</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" >
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="site-heading">
+                        <h1>TechBlog</h1>
+                        <h3>Android developer notes</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+              <article class="post-preview">
+                <a href="post3.html">
+                    <h2 class="post-title">
+                        WordsLayoutManager - a word-wrapping LinearLayoutManager for RecyclerView
+                    </h2>
+                </a>
+                <p class="post-meta">September 7, 2016</p>
+                <img class="img-responsive img-post-preview" align = "left" src="../img/post3/img1.png" width = "200px" alt="Текст с автоматическим выравниванием по ширине"  >
+
+                <h3 class="post-subtitle">
+                    The introduction of the RecyclerView &harr; LayoutManager pattern gave us the ability to display list-based
+                    data more flexibly. Right now, Google provides three standard LayoutManagers: <code class="class-name">LinearLayoutManager</code>, a
+                    linear list where each element takes up its own row; <code class="class-name">GridLayoutManager</code>, which displays data in a grid
+                    with a specific number of columns; and <code class="class-name">StaggeredGridLayoutManager</code>, which is a GridLayoutManager that can
+                    handle elements with dynamic heights. In every one of these cases, the number of columns must be specified ahead of time.
+                    <a href="post3.html" class = "read-more">Read more...</a>
+                </h3>
+                <br />
+
+              </article>
+              <hr />
+              <article class="post-preview">
+                  <a href="post2.html">
+                      <h2 class="post-title">
+                          Creating a custom View with text justification
+                      </h2>
+                  </a>
+                  <p class="post-meta">September 1, 2016</p>
+                  <img class="img-responsive img-post-preview" align = "left" src="../img/post2/img1.png" width = "200px" alt="Текст с автоматическим выравниванием по ширине"  >
+
+                  <h3 class="post-subtitle">
+                      For a long time, I wasn’t interested in how Views and text rendering were implemented at a
+                      lower level. I knew the basics: there are functions called <code class="function">onLayout()</code>, <code class="function">onMeasure()</code>,
+                     and <code class="function">onDraw()</code>,
+                      where all the magic happens. Recently, though, I started getting more opportunities to create Views
+                      with custom text rendering, and, as a result, I decided to explore and wrap my head around all of
+                      the intricacies in the logic behind controlling the display of a custom View. For this example,
+                      I chose to create a view that displays text with automatic full-width justification.
+                      <a href="post2.html" class = "read-more">Read more...</a>
+                  </h3>
+                  <br />
+
+                </article>
+                <hr />
+                <article class="post-preview">
+                    <a href="post1.html">
+                        <h2 class="post-title">
+                            Code reuse with Gradle's dependency management
+                        </h2>
+                    </a>
+
+                    <p class="post-meta">August 26, 2016</p>
+
+                    <h3 class="post-subtitle">
+                        Too often, when we move from project to project, we find ourselves needing the same
+                        classes over and over. I used to solve this problem in new projects by simply copying
+                        code that gave me the functionality I needed from an older project.
+                        <a href="post1.html" class = "read-more">Read more...</a>
+                    </h3>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <hr>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                   <p class="copyright text-muted">Copyright &copy; Techno Blog 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS/CSS -->
+    <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-84320298-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../js/tech-blog.min.js"></script>
+
+</body>
+
+</html>

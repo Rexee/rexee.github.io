@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Creating a custom View with text justification</title>
+
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/tech-blog.min.css" rel="stylesheet">
+    <link href="../css/prism.min.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-nav-right">
+                    <li>
+                        <a href="..\post2.html">RU</a>
+                    </li>
+                    <li class="selected">
+                        <a href="post2.html">EN</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" >
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="page-heading">
+                        <h1 class="h1-short">Creating a custom View with text justification</h1>
+                        <div class="post-date-short">September 1, 2016</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+                  <p>For a long time, I wasn’t interested in how Views and text rendering were implemented at a
+                    lower level. I knew the basics: there are functions called <code class="function">onLayout()</code>, <code class="function">onMeasure()</code>,
+                    and <code class="function">onDraw()</code>, where all the magic happens. Recently, though, I started
+                    getting more opportunities to create Views
+                    with custom text rendering, and, as a result, I decided to explore and wrap my head around all of
+                    the intricacies in the logic behind controlling the display of a custom View. For this example,
+                    I chose to create a view that displays text with automatic full-width justification:
+                    </p>
+                    <a href="../img/post2/img1.png">
+                      <img class="img-responsive img-center" src="../img/post2/img1.png" width = "250px" alt="View with text justification" style = "margin-bottom: -5px" >
+                    </a>
+                    <p>Using a simple <b>TextView</b> there is no way to make the text use the same full-width justification that you see in books. It’s true that the ability to control hyphenation was added in API 23
+                      (<a href="https://developer.android.com/reference/android/widget/TextView.html#attr_android:breakStrategy">breakStrategy</a>
+                      and <a href="https://developer.android.com/reference/android/widget/TextView.html#attr_android:hyphenationFrequency">hyphenationFrequency</a>
+                      but, first of all, neither of these affects text justification at all, and second of all, these options are only accessible in API 23 and higher.
+                    </p>
+                    <p>Before we get into the implementation, let’s take a moment to understand the theory. We need to make sure that the right
+                      edge of every line of text falls on the same imaginary vertical line—the same way the text in this blog post is aligned to
+                      an imaginary vertical line on the left edge. (The typographical term for this is:
+                      <a href="https://en.wikipedia.org/wiki/Typographic_alignment#Justified">Justification</a>).
+                      You can achieve this by increasing the spacing between words, as well as the spacing between individual characters, i.e.
+                      <a href="https://en.wikipedia.org/wiki/Letter-spacing">tracking</a>.
+                    </p>
+                    <p>
+                      The ability to set tracking was only added in API 21 (<a href="https://developer.android.com/reference/android/widget/TextView.html#attr_android:letterSpacing">setLetterSpacing</a>),
+                       so to use it, you would have to manually backport it so that it could be used in earlier API levels. In addition, it’s important to be very careful when changing letter spacing, as it becomes easy to lose uniformity in the text, making the text look less visually appealing. As a result, we won’t touch tracking for now; we’ll focus on spacing between words instead.
+                    </p>
+                    <p>
+                      Before we start on the algorithm, let’s figure out how Android handles text rendering. The main rendering hub is the function
+                      <code class="language-java">onDraw(Canvas canvas)</code>), where all rendering calls have to be made. The simplest way to draw
+                      text onto a  <code class="code">canvas</code>is to use the function
+                      <code class="language-java">canvas.drawText(text, start, end, x, y, paint)</code>.
+                      In order to understand what the values of <b>x</b> and <b>y</b> should be, let’s take a look at Android’s coordinate system:
+                    </p>
+                    <a href="../img/post2/img2.png">
+                      <img class="img-responsive img-center" src="../img/post2/img2.png" width = "500px" alt="Android canvas: coordinate system">
+                    </a>
+                    <p>
+                      On Android, in contrast to a standard coordinate system, the y-axis is inverted, starting at the top of the screen
+                      rather than the bottom. However, x and y, the parameters we pass to <code class="function">drawText()</code>,
+                      control the bottom-left corner of the first letter of the text.
+                      <i>fm.top</i>, <i>fm.ascent</i>, <i>fm.descent</i> – are fields in <code class="class-name">FontMetrics</code>
+                      that we can get from  <code class="language-java">mTextPaint.getFontMetrics()</code>.
+                      <i>fm.top</i> – is the distance between the <a href="https://en.wikipedia.org/wiki/Baseline_(typography)">baseline</a>
+                      and the top boundary of the line. <i>fm.ascent</i> – is the maximum height of a single character, and <i>fm.descent</i> –
+                      is the amount by which the bottom of a character can descend below the baseline. Since the bottom of a character can extend
+                      below the baseline and down into the next line <i>fm.top</i> should be big enough that characters won’t intersect.
+                    </p>
+                    <p>
+                      Now that we’ve figured out what kind of values to pass for the coordinates, I’ll explain the algorithm using words.
+                      Naturally, it’s not perfect and can certainly be optimized, but for this post, that’s not important.
+                      We don’t want to be making constant calculations whenever we call <code class="function">onDraw()</code>, so we will calculate x, y,
+                      and the width of each word ahead of time  in the <code class="function">setText()</code> function, and in <code class="function">onDraw()</code>
+                      we will simply use the stored coordinates to render text with <code class="function">drawText()</code>.
+                    </p>
+                    <p>The algorithm is as follows (presented as a slightly modified version for the sake of clarity):</p>
+                    <ul>
+                      <li>First, measure the width of each character:</li>
+                      <pre><code class="language-java">widths = new float[mText.length()];
+mTextPaint.getTextWidths(mText, widths);</code></pre>
+                      <li>Next, keep adding characters to the current line until you reach the right edge of the screen. Cut off the current line before the last word you added.</li>
+                      <li>Subtract the widths of the characters in the line, excluding spaces, from the width of the screen:</li>
+                      <pre><code class="language-java">for (TextBlockDrawable word : words) {
+    for (int i = word.start; i < word.end; i++) {
+        widthTotal -= widths[i];
+    }
+}</code></pre>
+                      <li>The remaining distance needs to be divided equally among the spaces in the line:</li>
+                      <pre><code class="language-java">int spacesShift = 0;
+for (TextBlockDrawable word : words) {
+    word.x += spacesShift;
+    spacesShift += spaceLen;
+}</code></pre>
+                      <li>That’s it. All that’s left is to render the individual words, already organized into lines, in <code class="function">onDraw()</code>:</li>
+                      <pre><code class="language-java">for (TextBlockDrawable block : mTextBlocks) {
+    canvas.drawText(mText, block.start, block.end, block.x, block.y, mTextPaint);
+}</code></pre>
+                    </ul>
+                    <p>
+                      The algorithm is not incredibly complex, and the Android team could have probably included it in
+                      <b>TextView</b>'s rendering implementation. Then again, we finally got hyphenation after 7 years—who knows,
+                      maybe we’ll even live to see text justification in the Android SDK. But for now, Romain Guy is working
+                      on exploring -
+                      <a href="https://medium.com/google-developers/a-better-underline-for-android-90ba3a2e4fb">which style of underline looks better</a>
+                    </p>
+                    <p>
+                      As always, the code from this post is available on Github: <a href="https://github.com/Rexee/JustifiedTextView">https://github.com/Rexee/JustifiedTextView</a>
+                    </p>
+                    <a href="../img/post2/img3.gif">
+                      <img class="img-responsive img-center" src="../img/post2/img3.gif" width = "200px" alt="Example of text justification">
+                    </a>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <hr>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                   <p class="copyright text-muted">Copyright &copy; Techno Blog 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS/CSS -->
+    <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-84320298-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../js/prism.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../js/tech-blog.min.js"></script>
+
+</body>
+
+</html>

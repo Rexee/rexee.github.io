@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>WordsLayoutManager - a word-wrapping LinearLayoutManager for RecyclerView</title>
+
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/tech-blog.min.css" rel="stylesheet">
+    <link href="../css/prism.min.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-nav-right">
+                    <li>
+                        <a href="..\post3.html">RU</a>
+                    </li>
+                    <li class="selected">
+                        <a href="post3.html">EN</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" >
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="page-heading">
+                        <h1>WordsLayoutManager - a word-wrapping LinearLayoutManager for RecyclerView</h1>
+                        <span class="post-date">September 7, 2016</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+                    <p> The introduction of the RecyclerView &harr; LayoutManager pattern gave us the ability to display list-based
+                      data more flexibly. Right now, Google provides three standard LayoutManagers: <code class="class-name">LinearLayoutManager</code>, a
+                      linear list where each element takes up its own row; <code class="class-name">GridLayoutManager</code>, which displays data in a grid
+                      with a specific number of columns; and <code class="class-name">StaggeredGridLayoutManager</code>, which is a GridLayoutManager that can
+                      handle elements with dynamic heights. In every one of these cases, the number of columns must be specified ahead of time.
+                    </p>
+                    <p>What if we need to display data without being tied to a static amount of columns? In this post, I will explore the implementation
+                      of a custom LayoutManager that can display data dynamically.
+                    </p>
+                    <p>We need to receive a list of elements (for example, words) as input, and our LayoutManager
+                      then needs to lay out these elements in a way that they fill up as much of each line as possible.
+                      If an element is too wide to fit on the current line, it should be carried over to the next line down.
+                      The result is a sort of word-wrapping scheme:
+                    </p>
+                    <a href="../img/post3/img1.png">
+                      <img class="img-responsive img-center" src="../img/post3/img1.png" width = "250px" alt="WordsLayoutManager: word-wrapping" style = "margin-bottom: -5px" >
+                    </a>
+                    <p>
+                      There are quite a few ways to implement this functionality, ranging from creating your own layout wrapped
+                      in a scroll view, to creating a totally custom LayoutManager that directly extends <code class="class-name">RecyclerView.LayoutManager</code>.
+                    </p>
+                    <p>
+                      I decided on something between those two implementations: creating our own LayoutManager that
+                      extends <code class="class-name">LinearLayoutManager</code>. This way, we can reuse all the functionality in
+                      <code class="class-name">LinearLayoutManager</code>
+                      that the developers at Google spent hours poring over so it would be free of bugs and undefined behavior.
+                      As a result, we don’t have to worry about handling a whole host of different edge cases, nor do we have
+                      to handle scrolling physics, all the possible states of isPreLayout, etc. (all are very important considerations,
+                      but all would take far too long to implement). We will simply keep the existing functionality and rewrite the
+                      logic that specifies how lines are laid out.
+                    </p>
+                    <p>
+                      I will explain how LayoutManager works for those who aren’t aware. LayoutManager takes Views from a Recycler and lays them out on the screen in some configuration. The possibilities for the various layouts you can implement are pretty much endless. There are two main functions that house custom layout logic:
+                    </p>
+                    <ol>
+                      <li>
+                        <code class="function">onLayoutChildren</code> – this function is called the first time the layout is displayed
+                        (more specifically, when <code class="function">onLayout()</code> is called in the RecyclerView), and when
+                          <code class="function">notifyDataSetChanged()</code> is called on the adapter.
+                      </li>
+                      <li>
+                        <code class="function">scrollHorizontallyBy</code>/<code class="function">scrollVerticallyBy</code> – called when the user scrolls.
+                      </li>
+                    </ol>
+                    <p>Technically speaking there are various other methods like <code class="function">onFocusSearchFailed</code> and
+                       <code class="function">layoutForPredictiveAnimations</code>, but for the problem we are trying to solve in this
+                       post, we won’t need to bother with those details, seeing as our method takes care of them for us.</p>
+                    <p>
+                      In the standard <code class="class-name">LinearLayoutManager</code>, all display logic is concentrated in
+                      two main functions:
+                       <code class="function">fill</code>, which controls the layout of lines, and
+                       <code class="function">layoutChunk</code>, which controls the layout of individual
+                      elements on a line. In our case, we’ll override <code class="function">layoutChunk</code>.
+                    </p>
+                    <p>
+                      First, create the class <code class="class-name">WordsLayoutManager</code> which extends
+                       <code class="class-name">LinearLayoutManager</code>.
+                      In order to determine whether a word fits on the current line, we will need to know the
+                      width of the space available to the layout. In order to calculate this, override <code class="function">onLayoutChildren</code>:
+                      <pre><code class="language-java">
+                        @Override
+                        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+                            layoutWidth = getWidth() - getPaddingRight() - getPaddingLeft();
+                            super.onLayoutChildren(recycler, state);
+                        }
+                      </code></pre>
+                    </p>
+                  <p>
+                    Then, to simplify calculations, create two helper classes <code class="class-name">ViewModel</code> and <code class="class-name">LineModel</code>:
+                    <pre><code class="language-java">
+                      private class ViewModel {
+                          private View view;
+                          private int  width;
+
+                          public ViewModel(View child) {
+                              view = child;
+                              LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                              width = child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin;
+                          }
+                      }
+
+                      private class LineModel {
+                          private ArrayList<ViewModel> views;
+                          private int       width;
+
+                          public LineModel() {
+                              views = new ArrayList<>();
+                          }
+
+                          public void addView(ViewModel child) {
+                              addView(child, views.size());
+                          }
+
+                          public void addView(ViewModel child, int pos) {
+                              views.add(pos, child);
+                              width += child.width;
+                          }
+
+                          public boolean canFit(ViewModel child) {
+                              return width + child.width <= layoutWidth;
+                          }
+                      }
+                  </code></pre>
+                  </p>
+                  <p>
+                    The purpose of <code class="class-name">ViewModel</code> is to store the width of a View.
+                    <code class="class-name">LineModel</code>, by comparison, stores the width of a line and contains the
+                    logic to check whether a given View will fit on the current line.
+                  </p>
+                  <p>
+                    The first problem you’ll run into is that <code class="function">fill</code><code class="function">fill</code> and
+                    <code class="function">layoutChunk</code> are functions with
+                    <a href="https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html">package private access</a>, meaning you can’t simply override them. You’ll have to put the
+                    class in the same package as <code class="class-name">LinearLayoutManager</code> by replacing the package line
+                    (the first line in the file) with package <code class="language-java">package android.support.v7.widget</code>.
+                    Now, you can override the methods.
+                  </p>
+                  <p>
+                    The logic of the overridden <code class="function">layoutChunk</code> method can be organized into two sections.
+                    First, we grab Views from the Recycler and pass them to the <code class="class-name">LineModel</code> object until
+                    it can no longer fit any more Views on the current line. Here is a condensed implementation,
+                    missing some additional checks:
+                    <pre><code class="language-java">
+                      while(layoutState.hasMore(state)){
+                          childView = layoutState.next(recycler);
+
+                          measureChildWithMargins(childView, 0, 0);
+                          ViewModel view = new ViewModel(childView);
+
+                          if (currentLine.canFit(view)) {
+                              result.mConsumed = mOrientationHelper.getDecoratedMeasurement(childView);
+                              currentLine.addView(view);
+                              addView(childView);
+                          } else {
+                              layoutState.mCurrentPosition--;
+                              break;
+                          }
+                      }
+                    </code></pre>
+                  </p>
+                  <p>
+                    <code class="language-java">layoutState.mCurrentPosition--</code> makes sure that we exclude
+                    the last View we got from the Recycler, which is important since it was the one that we couldn’t
+                    fit on the current line. (Since <code class="language-java">layoutState.next(recycler)</code>
+                     automatically incremented <code class="code">mCurrentPosition</code>,
+                    and the last element wouldn’t fit on the current line, we would otherwise simply lose the element
+                    and it would never be displayed on the following line.) We could have created a caching mechanism,
+                    which would have entailed making some additional checks and managing the cache somehow, but since
+                    that is not really critical to our use-case, we will simply decrement the current position.
+                  </p>
+                  <p>
+                    If you look at the source code for this post, you will see that in addition to keeping track
+                    of the current position, it’s also important to consider the direction in which elements are
+                    laid out (top-to-bottom or bottom-to-top). The direction determines whether we need to put the
+                    next View into the beginning or end of the list.
+                  </p>
+                  <p>
+                    The second part of the algorithm:
+                    <pre><code class="language-java">
+                      int top = layoutState.mOffset;
+                      int bottom = layoutState.mOffset + result.mConsumed;
+                      int left = getPaddingLeft();
+
+                      int prevWidth = 0;
+                      for (ViewModel child : currentLine.views) {
+                          layoutDecorated(child.view, left + prevWidth, top, left + prevWidth + child.width, bottom);
+                          prevWidth += child.width;
+                      }
+                    </code></pre>
+                  </p>
+                  <p>
+                    Here,  <code class="language-java">layoutState.mOffset</code> is the offset from the beginning of the
+                    layout, and <code class="language-java">result.mConsumed</code>
+                    is the current height of the line, which we calculated in the previous step. And the main function,
+                    <code class="function">layoutDecorated</code>, renders a View to the screen in a given position.
+                    Essentially, we’re just taking the
+                     <code class="code">currentLine</code> object that we set in the first step and laying out all of its
+                     Views in order from left to right.
+                  </p>
+                  <p>
+                    It’s not exactly a tricky implementation. In order to use our LayoutManager, we can simply assign it to our RecyclerView using the standard method:
+                    <pre><code class="language-java">
+                      RecyclerView recycler = (RecyclerView) findViewById(R.id.recycler);
+                      recycler.setLayoutManager(new WordsLayoutManager(this));
+                    </code></pre>
+                  </p>
+                  <p>
+                    You can find the full source of this implementation and an example of its usage on GitHub: <a href="https://github.com/Rexee/WordsLayoutManager">https://github.com/Rexee/WordsLayoutManager</a>
+                  </p>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <hr>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                   <p class="copyright text-muted">Copyright &copy; Techno Blog 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS/CSS -->
+    <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-84320298-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../js/prism.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../js/tech-blog.min.js"></script>
+
+</body>
+
+</html>

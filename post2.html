@@ -33,6 +33,15 @@
                         <a href="about.html">About</a>
                     </li>
                 </ul>
+                <ul class="nav navbar-nav navbar-nav-right">
+                    <li class="selected">
+                        <a href="post2.html">RU</a>
+                    </li>
+                    <li>
+                        <a href="\en\post2.html">EN</a>
+                    </li>
+                </ul>
+
             </div>
             <!-- /.navbar-collapse -->
         </div>
@@ -80,7 +89,7 @@
                       Итак, нам нужно чтобы правый край текста был выровнен вдоль одной вертикальной линии так же
                       как сейчас мы видим выровнен левый (Типографский термин: <a href="https://ru.wikipedia.org/wiki/%D0%92%D1%8B%D0%BA%D0%BB%D1%8E%D1%87%D0%BA%D0%B0_(%D1%82%D0%B8%D0%BF%D0%BE%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0)#.D0.92.D1.8B.D0.BA.D0.BB.D1.8E.D1.87.D0.BA.D0.B0_.D0.BF.D0.BE_.D1.84.D0.BE.D1.80.D0.BC.D0.B0.D1.82.D1.83">Выключка по формату</a>).
                       Этого добиться можно следующими способами: увеличением размеров пробелов между словами и увеличением межсимвольного интервала, т.е.
-                      <a href="https://ru.wikipedia.org/wiki/%D0%A2%D1%80%D0%B5%D0%BA%D0%B8%D0%BD%D0%B3_(%D1%82%D0%B8%D0%BF%D0%BE%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0">трекинга</a>
+                      <a href="https://ru.wikipedia.org/wiki/%D0%A2%D1%80%D0%B5%D0%BA%D0%B8%D0%BD%D0%B3_(%D1%82%D0%B8%D0%BF%D0%BE%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0)">трекинга</a>.
                     </p>
                     <p>
                       Настройка трекинга появилась только в API 21 (<a href="https://developer.android.com/reference/android/widget/TextView.html#attr_android:letterSpacing">setLetterSpacing</a>)
@@ -100,11 +109,11 @@
                     </a>
                     <p>
                       В отличие от привычной системы координат, в Android ось Y перевернута и начинает свой отсчет от левого верхнего угла.
-                      В то время как координаты x и y, которые мы передаем в drawText указывают на левый нижний угол первой буквы текста.
-                      <i>Fm.top</i>, <i>fm.ascent</i>, <i>fm.descent</i> – это поля из <code class="class-name">FontMetrics</code> которые получаем при помощи <code class="language-java">mTextPaint.getFontMetrics()</code>.
-                      <i>Fm.top</i> – расстояние от <a href="https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D1%8F_%D0%BB%D0%B8%D0%BD%D0%B8%D1%8F_(%D0%B4%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD_%D1%88%D1%80%D0%B8%D1%84%D1%82%D0%B0)">базовой линии</a>
-                      до верхней границы строки. <i>Fm.ascent</i> – максимальная высота символов, fm.descent – высота нижних элементов символов.
-                      Нижние элементы могут заходить на следующую строку, размера fm.top должно хватать чтобы символы не пересекались.
+                      В то время как координаты x и y, которые мы передаем в <code class="function">drawText()</code> указывают на левый нижний угол первой буквы текста.
+                      <i>fm.top</i>, <i>fm.ascent</i>, <i>fm.descent</i> – это поля из <code class="class-name">FontMetrics</code> которые получаем при помощи <code class="language-java">mTextPaint.getFontMetrics()</code>.
+                      <i>fm.top</i> – расстояние от <a href="https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D1%8F_%D0%BB%D0%B8%D0%BD%D0%B8%D1%8F_(%D0%B4%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD_%D1%88%D1%80%D0%B8%D1%84%D1%82%D0%B0)">базовой линии</a>
+                      до верхней границы строки. <i>fm.ascent</i> – максимальная высота символов, <i>fm.descent</i> – высота нижних элементов символов.
+                      Нижние элементы могут заходить на следующую строку, размера <i>fm.top</i> должно хватать чтобы символы не пересекались.
                     </p>
                     <p>
                       После того, как мы разобрались с тем что использовать в качестве координат, опишу собственно алгоритм на словах.
@@ -169,7 +178,15 @@ for (TextBlockDrawable word : words) {
 
     <!-- JS/CSS -->
     <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
-
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-84320298-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>

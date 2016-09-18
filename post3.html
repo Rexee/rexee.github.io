@@ -33,6 +33,15 @@
                         <a href="about.html">About</a>
                     </li>
                 </ul>
+                <ul class="nav navbar-nav navbar-nav-right">
+                    <li class="selected">
+                        <a href="post3.html">RU</a>
+                    </li>
+                    <li>
+                        <a href="\en\post3.html">EN</a>
+                    </li>
+                </ul>
+
             </div>
             <!-- /.navbar-collapse -->
         </div>
@@ -74,7 +83,7 @@
                       помещается на данную строку, то переносим его на следующую. Получается что-то вроде word-wrap (перенос по словам):
                     </p>
                     <a href="img/post3/img1.png">
-                      <img class="img-responsive img-center" src="img/post3/img1.png" width = "250px" alt="Текст с автоматическим выравниванием по ширине" style = "margin-bottom: -5px" >
+                      <img class="img-responsive img-center" src="img/post3/img1.png" width = "250px" alt="WordsLayoutManager: переносом по словам" style = "margin-bottom: -5px" >
                     </a>
                     <p>
                       Сразу оговорюсь, что способов решения задачи достаточно много, начиная от формирования своего Layout и
@@ -93,7 +102,8 @@
                     </p>
                     <ol>
                       <li>
-                        <code class="function">onLayoutChildren</code> – эта функция вызывается при первичном выводе (точнее при вызове onLayout() у RecyclerView) и при оповещении notifyDataSetChanged() для адаптера.
+                        <code class="function">onLayoutChildren</code> – эта функция вызывается при первичном выводе (точнее при вызове <code class="function">onLayout()</code> у
+                         RecyclerView) и при оповещении <code class="function">notifyDataSetChanged()</code> для адаптера.
                       </li>
                       <li>
                         <code class="function">scrollHorizontallyBy</code>/<code class="function">scrollVerticallyBy</code> – при скроллинге.
@@ -256,7 +266,15 @@
 
     <!-- JS/CSS -->
     <!-- Yandex.Metrika counter --> <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter39282455 = new Ya.Metrika({ id:39282455, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/39282455" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
-
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-84320298-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
